@@ -24,14 +24,14 @@ Corresponding output in LLDB
 ## Installation
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/tehrengruber/LLDB-Eigen-Data-Formatter/master/tools/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/longcw/LLDB-Eigen-Data-Formatter/master/tools/install.sh)"
 ```
 
 __Manual Installation__
 
 ```bash
 INSTALL_PATH=~/.lldb-eigen-data-formatter
-git clone https://github.com/tehrengruber/LLDB-Eigen-Data-Formatter.git $INSTALL_PATH
+git clone https://github.com/longcw/LLDB-Eigen-Data-Formatter.git $INSTALL_PATH
 echo 'command script import "'$INSTALL_PATH'/LLDB_Eigen_Data_Formatter.py"' >> ~/.lldbinit
 ```
 
@@ -48,3 +48,6 @@ Afterwards remove the `command script import` command in `~/.lldbinit`.
 Copyright © 2016 Till Ehrengruber
 
 Distributed under the GNU GENERAL PUBLIC LICENSE.
+
+## Opencv Formatter
+https://github.com/longcw/LLDB-Opencv-Data-Formatter
