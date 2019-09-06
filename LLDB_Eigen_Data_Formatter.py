@@ -35,18 +35,19 @@ def evaluate_expression(valobj, expr):
         expr)
 
 
-def print_raw_matrix(valobj, rows, cols):
-    if rows * cols > 100:
-        return "[matrix too large]"
+def print_raw_matrix(valobj, rows, cols, is_rowmajor):
     output = ""
     # print matrix dimensions
     output += "rows: " + str(rows) + ", cols: " + str(cols) + "\n["
+    if rows * cols > 1000:
+        output += 'matrix too large]'
+        return output;
 
     # determine padding
     padding = 1
     for i in range(0, rows * cols):
         padding = max(padding, len(
-            str(valobj.GetChildAtIndex(i, lldb.eNoDynamicValues, True).GetValue())))
+            '%.3f' % float(valobj.GetChildAtIndex(i, lldb.eNoDynamicValues, True).GetValue())))
 
     # print values
     for i in range(0, rows):
@@ -54,14 +55,16 @@ def print_raw_matrix(valobj, rows, cols):
             output += " "
 
         for j in range(0, cols):
-            val = valobj.GetChildAtIndex(j + i * cols, lldb.eNoDynamicValues,
-                                         True).GetValue()
+            idx = j + i * cols if is_rowmajor else i + j * rows
+            val = valobj.GetChildAtIndex(idx, lldb.eNoDynamicValues, True).GetValue()
+            val = '%.3f' % float(val)
             output += val.rjust(padding + 1, ' ')
 
         if i != rows - 1:
             output += ";\n"
 
     output += " ]\n"
+    output += "show as rowmajor: {}\n".format(is_rowmajor)
     return output
 
 
@@ -80,12 +83,14 @@ def fixed_sized_matrix_to_string(valobj):
 
     # determine rows and cols
     rows = cols = 0
+    is_rowmajor = 1  # TODO
     with suppress_stdout_stderr():
         # todo: check result is valid
         rows = evaluate_expression(valobj,
                                    valobj_expression_path + ".rows()").GetValueAsSigned()
         cols = evaluate_expression(valobj,
                                    valobj_expression_path + ".cols()").GetValueAsSigned()
+
         # rows = lldb.frame.EvaluateExpression(valobj_expression_path+".rows()").GetValueAsSigned()
         # cols = lldb.frame.EvaluateExpression(valobj_expression_path+".cols()").GetValueAsSigned()
 
@@ -98,7 +103,7 @@ def fixed_sized_matrix_to_string(valobj):
         cols = 1
         rows = num_data_elements
 
-    return print_raw_matrix(data, rows, cols)
+    return print_raw_matrix(data, rows, cols, is_rowmajor)
 
 
 def dynamically_sized_matrix_to_string(valobj):
@@ -116,6 +121,7 @@ def dynamically_sized_matrix_to_string(valobj):
 
     # determine rows and cols
     rows = cols = 0
+    is_rowmajor = 1  # TODO
     with suppress_stdout_stderr():
         # todo: check result is valid
         rows = evaluate_expression(valobj,
@@ -133,7 +139,7 @@ def dynamically_sized_matrix_to_string(valobj):
     if not memory_accessable:
         return "[uninitialized]"
 
-    return print_raw_matrix(data, rows, cols)
+    return print_raw_matrix(data, rows, cols, is_rowmajor)
 
 
 def format_matrix(valobj, internal_dict):
